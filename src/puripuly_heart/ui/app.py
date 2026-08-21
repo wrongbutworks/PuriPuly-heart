@@ -232,6 +232,9 @@ class TranslatorApp:
                 toggle_overlay=self._on_overlay_toggle,
                 retry_peer_process_capture=self._on_retry_peer_process_capture,
                 run_gpu_notice_action=self.application.handle_gpu_notice_action,
+                run_managed_gemma_notice_action=(
+                    self.application.handle_managed_gemma_notice_action
+                ),
             ),
         )
 
@@ -638,8 +641,8 @@ class TranslatorApp:
             parameter.kind == inspect.Parameter.VAR_KEYWORD
             for parameter in update_parameters.values()
         ):
-            update_kwargs["on_launch_snackbar_shown"] = (
-                lambda snackbar: self._mark_launch_high_priority_feedback_shown("update", snackbar)
+            update_kwargs["on_launch_snackbar_shown"] = lambda snackbar: (
+                self._mark_launch_high_priority_feedback_shown("update", snackbar)
             )
         try:
             await _check_and_notify_update(self.page, **update_kwargs)
@@ -1015,11 +1018,7 @@ class TranslatorApp:
                     self.view_settings.has_provider_changes = False
 
                     async def _task():
-                        applied = await self.application.apply_providers(pending_settings)
-                        if applied:
-                            self._run_page_task(
-                                self.application.install_selected_gpu_model_if_needed
-                            )
+                        await self.application.apply_providers(pending_settings)
 
                     self._queue_settings_mutation_task(_task)
             elif getattr(self.view_settings, "has_pending_prompt_changes", False):
@@ -1035,8 +1034,6 @@ class TranslatorApp:
                         await self.application.apply_settings(merged_settings)
 
                     self._queue_settings_mutation_task(_task)
-            else:
-                self._run_page_task(self.application.install_selected_gpu_model_if_needed)
 
         if index == 0:
             self.content_area.content = self.view_dashboard

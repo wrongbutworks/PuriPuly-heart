@@ -22,6 +22,7 @@ Runtime/bundled notice-sensitive components:
 - certifi: MPL-2.0.
 - NumPy binary wheels may include OpenBLAS, LAPACK, and GCC runtime library exception notices.
 - OpenVR runtime DLL: BSD-3-Clause.
+- llama.cpp CPU and Vulkan runtime: MIT.
 - Noto Sans CJK Medium TTC: SIL Open Font License 1.1.
 - Silero VAD ONNX model: MIT.
 - Bundled fonts: SIL Open Font License 1.1.
@@ -48,6 +49,48 @@ For package-managed dependencies, the authoritative license texts are distribute
 
 ----
 
+llama.cpp CPU and Vulkan runtime
+Source: https://github.com/ggml-org/llama.cpp
+Pinned release: https://github.com/ggml-org/llama.cpp/releases/tag/b10423
+Pinned commit: a94d563ed801d1da1b8c2432946de07d0231bb3d
+License: MIT
+
+Windows releases contain the pinned llama.cpp server runtime required for managed local translation. The application installer does not contain Gemma model weights. The complete llama.cpp license is installed at third_party/llama.cpp/LICENSE.
+
+----
+
+Gemma 4 E4B local translation model assets
+Upstream model source: https://huggingface.co/google/gemma-4-E4B-it
+Manifest mirror source used by the app: https://huggingface.co/unsloth/gemma-4-E4B-it-qat-GGUF
+License: Apache-2.0
+
+Gemma 4 models are released by Google under the Apache License 2.0
+(see https://www.apache.org/licenses/LICENSE-2.0 and
+https://ai.google.dev/gemma/apache_2).
+
+The managed local translation runtime downloads the pinned quantization of the
+Gemma 4 E4B instruction-tuned model on demand from the pinned Hugging Face
+repository revision listed below. The application installer does not contain
+model weights. Files are verified against the pinned size and SHA-256 before
+installation; the installed-manifest records the model identity, pinned
+revision, and license fields.
+
+- Manifest mirror repo: unsloth/gemma-4-E4B-it-qat-GGUF
+- Pinned revision: 8c5a9e4fd5482e2be20fe0bf013b4c262a8f4265
+- Target model: gemma-4-E4B-it-qat-UD-Q4_K_XL.gguf
+  - size: 4,215,695,776 bytes
+  - sha256: df0fd4ee07072c607c29a0a1cb4f98918426cca12f45a2776bdd6ee6d09a4de3
+- MTP drafter: mtp-gemma-4-E4B-it.gguf
+  - size: 59,678,016 bytes
+  - sha256: 423074e537504b4f9ec5eafed5c639fac82c96631626efccacdd3c4039b20605
+
+The upstream google/gemma-4-E4B-it repository is Apache-2.0. The mirror or
+converted assets referenced by the manifest may not expose complete license
+metadata, so pinned mirror provenance and license metadata must be verified
+before release.
+
+----
+
 Hugging Face Hub and Xet download runtime
 Sources: https://github.com/huggingface/huggingface_hub , https://github.com/huggingface/xet-core
 Pinned packages: huggingface-hub 1.26.0 ; hf-xet 1.5.2
@@ -63,8 +106,15 @@ Official upstream sources: https://huggingface.co/Qwen/Qwen3-ASR-0.6B , https://
 Manifest mirror sources used by the app: https://huggingface.co/csukuangfj2/sherpa-onnx-qwen3-asr-0.6B-int8-2026-03-25 , https://modelscope.cn/models/zengshuishui/Qwen3-ASR-onnx
 License: Apache-2.0
 
-The local Qwen3-ASR-0.6B model is a default local CPU STT model. The app manifest identifies pinned downloadable ONNX/tokenizer assets for local ASR setup.
-Official upstream Qwen3-ASR assets are Apache-2.0. The mirror or converted assets referenced by the manifest may not expose complete license metadata, so pinned mirror provenance and license metadata must be verified before release.
+Provenance chain verified 2026-08-20 (all links Apache-2.0):
+Qwen3-ASR official (Qwen/Qwen3-ASR-0.6B, Apache-2.0)
+  -> sherpa-onnx ONNX conversion (Wasser1462/Qwen3-ASR-onnx, Apache-2.0)
+  -> ModelScope source (zengshuishui/Qwen3-ASR-onnx, Apache-2.0)
+  -> HF mirror used by the app (csukuangfj2/sherpa-onnx-qwen3-asr-0.6B-int8-2026-03-25, pinned revision 2cc50d1abfe4d4f2df8d71f536d108bb40f943d2)
+  -> PuriPuly manifest (exact SHA-256 pins)
+  -> local execution
+
+The mirror's own README states the files are downloaded from the ModelScope source above, and the conversion uses the official sherpa-onnx export scripts (https://github.com/Wasser1462/Qwen3-ASR-onnx, https://k2-fsa.github.io/sherpa/onnx/qwen3-asr/export.html). The local Qwen3-ASR-0.6B model is a default local CPU STT model; the app manifest identifies pinned downloadable ONNX/tokenizer assets for local ASR setup.
 
 ----
 
@@ -73,7 +123,7 @@ Official upstream source: https://huggingface.co/Qwen/Qwen3-ASR-1.7B
 Manifest mirror source used by the app: https://huggingface.co/handy-computer/Qwen3-ASR-1.7B-gguf
 License: Apache-2.0
 
-The local GPU Qwen ASR GGUF model is not committed directly to this repository. The app manifest identifies the pinned downloadable GGUF asset for GPU-based local ASR setup. Official upstream Qwen3-ASR-1.7B assets are Apache-2.0.
+The local GPU Qwen ASR GGUF model is not committed directly to this repository. The app manifest identifies the pinned downloadable GGUF asset for GPU-based local ASR setup. The GGUF mirror is the official transcribe.cpp port of Qwen3-ASR-1.7B and its model card inherits Apache-2.0 from the upstream Qwen model (see https://github.com/handy-computer/transcribe.cpp/blob/main/docs/models/qwen3-asr-1.7b.md).
 
 ----
 
@@ -91,6 +141,14 @@ Source: https://github.com/snakers4/silero-vad
 License: MIT
 
 This application bundles the Silero VAD ONNX model file for offline Voice Activity Detection.
+
+Bundled artifact: silero_vad.onnx
+- size: 2,327,524 bytes
+- sha256: 1a153a22f4509e292a94e67d6f9b85e8deb25b4988682b7e174c65279d8788e3
+
+The bundled artifact identity is also pinned in
+src/puripuly_heart/core/vad/bundled.py (SILERO_VAD_RESOURCE_SHA256) and
+verified by tests/core/test_vad_bundled.py.
 
 ----
 
